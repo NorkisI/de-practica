@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Registro de Usuario</h2>
+    <form id="registerForm">
+      <input type="text" id="nombre" placeholder="Nombre completo" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <select id="nivel">
+        <option value="usuario">Usuario Normal</option>
+        <option value="admin">Administrador</option>
+      </select>
+      <button type="submit" class="btn">Registrarse</button>
+    </form>
+    <p id="message"></p>
+    <a href="index.html">Volver al inicio</a>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const nivel = document.getElementById('nivel').value;
+
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, password, nivel })
+      });
+
+      const data = await response.json();
+      const messageEl = document.getElementById('message');
+
+      if (response.ok) {
+        messageEl.textContent = 'Registro exitoso. Ahora puedes iniciar sesión.';
+        messageEl.style.color = 'green';
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+      } else {
+        messageEl.textContent = 'Error: ' + data.error;
+        messageEl.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
