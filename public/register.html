@@ -3,52 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro</title>
+  <title>Registro | Nexus Auth</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Fondo animado -->
+  <div class="background-animation">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+  </div>
+
   <div class="container">
-    <h2>Registro de Usuario</h2>
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-user-plus"></i>
+      </div>
+      <h1>Crear Cuenta</h1>
+      <p>Únete a nuestro sistema de forma segura</p>
+    </div>
+
     <form id="registerForm">
-      <input type="text" id="nombre" placeholder="Nombre completo" required>
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <select id="nivel">
-        <option value="usuario">Usuario Normal</option>
-        <option value="admin">Administrador</option>
-      </select>
-      <button type="submit" class="btn">Registrarse</button>
+      <div class="form-group">
+        <label for="nombre">Nombre Completo</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user"></i>
+          <input type="text" id="nombre" placeholder="John Doe" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo Electrónico</label>
+        <div class="input-with-icon">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="email" placeholder="tu@email.com" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña Segura</label>
+        <div class="input-with-icon">
+          <i class="fas fa-key"></i>
+          <input type="password" id="password" placeholder="Mínimo 8 caracteres" required minlength="8">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="nivel">Tipo de Cuenta</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user-tag"></i>
+          <select id="nivel">
+            <option value="usuario">Usuario Normal</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-with-icon">
+          <i class="fas fa-check-circle"></i>
+          <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+        </div>
+        <small style="display: block; margin-top: 8px; color: #94a3b8; font-size: 12px;">
+          <i class="fas fa-info-circle"></i> Las contraseñas deben coincidir
+        </small>
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn" id="submitBtn">
+          <i class="fas fa-user-check"></i>
+          <span id="btnText">Crear Mi Cuenta</span>
+          <div class="loading" id="loadingIcon" style="display: none;"></div>
+        </button>
+      </div>
     </form>
-    <p id="message"></p>
-    <a href="index.html">Volver al inicio</a>
+
+    <div id="message"></div>
+
+    <div class="links">
+      <a href="login.html" class="link">
+        <i class="fas fa-sign-in-alt"></i>
+        ¿Ya tienes cuenta? Inicia sesión
+      </a>
+      <br>
+      <a href="index.html" class="link">
+        <i class="fas fa-arrow-left"></i>
+        Volver al inicio
+      </a>
+    </div>
   </div>
 
   <script>
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const messageEl = document.getElementById('message');
+      
+      // Validar que las contraseñas coincidan
+      if (password !== confirmPassword) {
+        messageEl.textContent = '✗ Las contraseñas no coinciden';
+        messageEl.className = 'message-error';
+        return;
+      }
+      
+      // Validar fortaleza de contraseña
+      if (password.length < 8) {
+        messageEl.textContent = '✗ La contraseña debe tener al menos 8 caracteres';
+        messageEl.className = 'message-error';
+        return;
+      }
+      
+      // Mostrar estado de carga
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const loadingIcon = document.getElementById('loadingIcon');
+      
+      btnText.textContent = 'Creando cuenta...';
+      loadingIcon.style.display = 'inline-block';
+      submitBtn.disabled = true;
+      
       const nombre = document.getElementById('nombre').value;
       const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
       const nivel = document.getElementById('nivel').value;
 
-      const response = await fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email, password, nivel })
-      });
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, email, password, nivel })
+        });
 
-      const data = await response.json();
-      const messageEl = document.getElementById('message');
+        const data = await response.json();
 
-      if (response.ok) {
-        messageEl.textContent = 'Registro exitoso. Ahora puedes iniciar sesión.';
-        messageEl.style.color = 'green';
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 1500);
+        if (response.ok) {
+          messageEl.textContent = '✓ ¡Cuenta creada exitosamente! Redirigiendo...';
+          messageEl.className = 'message-success';
+          
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          messageEl.textContent = '✗ Error: ' + data.error;
+          messageEl.className = 'message-error';
+        }
+      } catch (error) {
+        messageEl.textContent = '✗ Error de conexión. Intenta nuevamente.';
+        messageEl.className = 'message-error';
+      } finally {
+        // Restaurar estado del botón
+        btnText.textContent = 'Crear Mi Cuenta';
+        loadingIcon.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // Validación en tiempo real de contraseñas
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        this.style.borderColor = 'var(--error)';
+      } else if (confirmPassword) {
+        this.style.borderColor = 'var(--success)';
       } else {
-        messageEl.textContent = 'Error: ' + data.error;
-        messageEl.style.color = 'red';
+        this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
       }
     });
   </script>
