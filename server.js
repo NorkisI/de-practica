@@ -237,6 +237,182 @@ app.delete('/productos/:id', verificarToken, verificarAdmin, async (req, res) =>
   }
 });
 
+// ========== CARRITO DE COMPRAS ==========
+
+// Crear tabla de carritos
+(async () => {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS carritos (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+        producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE,
+        cantidad INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+        fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(usuario_id, producto_id) -- Evita duplicados
+      );
+    `);
+    console.log('Tabla carritos lista');
+  } finally {
+    client.release();
+  }
+})();
+
+// 1. Agregar producto al carrito
+app.post('/carrito', verificarToken, async (req, res) => {
+  const { producto_id, cantidad = 1 } = req.body;
+  const usuario_id = req.usuario.id;
+
+  if (!producto_id) {
+    return res.status(400).json({ error: 'producto_id es requerido' });
+  }
+
+  if (cantidad <= 0) {
+    return res.status(400).json({ error: 'La cantidad debe ser mayor a 0' });
+  }
+
+  try {
+    // Verificar que el producto existe
+    const productoCheck = await pool.query('SELECT id FROM productos WHERE id = $1', [producto_id]);
+    if (productoCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    // Usar UPSERT (INSERT o UPDATE si ya existe)
+    const result = await pool.query(`
+      INSERT INTO carritos (usuario_id, producto_id, cantidad) 
+      VALUES ($1, $2, $3)
+      ON CONFLICT (usuario_id, producto_id) 
+      DO UPDATE SET cantidad = carritos.cantidad + EXCLUDED.cantidad
+      RETURNING id, usuario_id, producto_id, cantidad, fecha_agregado
+    `, [usuario_id, producto_id, cantidad]);
+
+    res.status(201).json({ 
+      mensaje: 'Producto agregado al carrito', 
+      item: result.rows[0] 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al agregar al carrito' });
+  }
+});
+
+// 2. Ver mi carrito con total calculado
+app.get('/carrito', verificarToken, async (req, res) => {
+  const usuario_id = req.usuario.id;
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.producto_id,
+        c.cantidad,
+        c.fecha_agregado,
+        p.nombre,
+        p.codigo,
+        p.precio,
+        p.descripcion,
+        (p.precio * c.cantidad) as subtotal
+      FROM carritos c
+      JOIN productos p ON c.producto_id = p.id
+      WHERE c.usuario_id = $1
+      ORDER BY c.fecha_agregado DESC
+    `, [usuario_id]);
+
+    // Calcular total general
+    const total = result.rows.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+
+    res.json({
+      items: result.rows,
+      total: total.toFixed(2),
+      cantidad_items: result.rows.length
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener el carrito' });
+  }
+});
+
+// 3. Actualizar cantidad en el carrito
+app.put('/carrito/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  const { cantidad } = req.body;
+  const usuario_id = req.usuario.id;
+
+  if (!cantidad || cantidad <= 0) {
+    return res.status(400).json({ error: 'Cantidad debe ser mayor a 0' });
+  }
+
+  try {
+    const result = await pool.query(`
+      UPDATE carritos 
+      SET cantidad = $1 
+      WHERE id = $2 AND usuario_id = $3
+      RETURNING *
+    `, [cantidad, id, usuario_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Item no encontrado en tu carrito' });
+    }
+
+    res.json({ 
+      mensaje: 'Cantidad actualizada', 
+      item: result.rows[0] 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar el carrito' });
+  }
+});
+
+// 4. Eliminar item del carrito
+app.delete('/carrito/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  const usuario_id = req.usuario.id;
+
+  try {
+    const result = await pool.query(`
+      DELETE FROM carritos 
+      WHERE id = $1 AND usuario_id = $2
+      RETURNING *
+    `, [id, usuario_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Item no encontrado en tu carrito' });
+    }
+
+    res.json({ 
+      mensaje: 'Producto eliminado del carrito', 
+      item: result.rows[0] 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar del carrito' });
+  }
+});
+
+// 5. Vaciar carrito completo
+app.delete('/carrito', verificarToken, async (req, res) => {
+  const usuario_id = req.usuario.id;
+
+  try {
+    const result = await pool.query(`
+      DELETE FROM carritos 
+      WHERE usuario_id = $1
+      RETURNING *
+    `, [usuario_id]);
+
+    res.json({ 
+      mensaje: 'Carrito vaciado', 
+      items_eliminados: result.rows.length 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al vaciar el carrito' });
+  }
+});
+
     // Generar token simple
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email, nivel: usuario.nivel },

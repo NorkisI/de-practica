@@ -342,6 +342,9 @@
         <button class="action-btn btn-primary" id="btnNuevoProducto">
           <i class="fas fa-plus"></i> Nuevo Producto
         </button>
+        <button class="action-btn btn-primary" onclick="window.location.href='carrito.html'">
+            <i class="fas fa-shopping-cart"></i> Mi Carrito
+        </button>
         <button class="action-btn btn-secondary" onclick="cargarProductos()">
           <i class="fas fa-sync-alt"></i> Actualizar
         </button>
@@ -550,6 +553,9 @@
             <div class="product-footer">
               <small style="color: #94a3b8;">Creado: ${new Date(producto.fecha_creacion).toLocaleDateString()}</small>
               <div class="product-actions">
+                <button class="action-icon" onclick="agregarAlCarrito(${producto.id}, '${producto.nombre}')" title="Agregar al carrito">
+                  <i class="fas fa-cart-plus"></i>
+                </button>
                 <button class="action-icon" onclick="verDetalleProducto('${producto.codigo}')" title="Ver detalles">
                   <i class="fas fa-eye"></i>
                 </button>
@@ -571,6 +577,35 @@
       contenedor.innerHTML = html;
     }
     
+    async function agregarAlCarrito(productoId, productoNombre) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+          mostrarMensaje('Debes iniciar sesión para agregar al carrito', 'error');
+        return;
+      }
+
+    try {
+      const response = await fetch('/carrito', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ producto_id: productoId, cantidad: 1 })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      mostrarMensaje(`✓ "${productoNombre}" agregado al carrito`, 'success');
+    } else {
+      mostrarMensaje('✗ Error: ' + data.error, 'error');
+    }
+  } catch (error) {
+    mostrarMensaje('✗ Error de conexión', 'error');
+  }
+}
+
     // Filtrar productos
     function filtrarProductos() {
       const busqueda = document.getElementById('buscarProducto').value.toLowerCase();
