@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Historial | Nexus Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .historial-container {
+      max-width: 1200px;
+      padding: 20px;
+    }
+    
+    .historial-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .historial-stats {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    
+    .filtros {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .filtro-btn {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .filtro-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .orden-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+    
+    .orden-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .orden-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .orden-id {
+      font-weight: 600;
+      color: white;
+    }
+    
+    .orden-fecha {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    
+    .orden-total {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--success);
+    }
+    
+    .productos-lista {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .producto-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+    }
+    
+    .producto-nombre {
+      color: white;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .producto-detalle {
+      display: flex;
+      justify-content: space-between;
+      color: #94a3b8;
+    }
+    
+    .estado-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .estado-completado {
+      background: rgba(74, 222, 128, 0.2);
+      color: #4ade80;
+    }
+    
+    .estado-pendiente {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado -->
+  <div class="background-animation">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+  </div>
+
+  <div class="container historial-container">
+    <div class="historial-header">
+      <div>
+        <h1><i class="fas fa-history"></i> Historial de Compras</h1>
+        <p>Todas tus órdenes en un solo lugar</p>
+      </div>
+      
+      <div class="historial-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="totalOrdenes">0</div>
+          <div class="stat-label">Órdenes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalGastado">$0</div>
+          <div class="stat-label">Total gastado</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="filtros">
+      <button class="filtro-btn active" onclick="filtrarOrdenes('todas')">Todas</button>
+      <button class="filtro-btn" onclick="filtrarOrdenes('completado')">Completadas</button>
+      <button class="filtro-btn" onclick="filtrarOrdenes('pendiente')">Pendientes</button>
+    </div>
+    
+    <div id="contenidoHistorial">
+      <!-- Contenido dinámico -->
+      <div style="text-align: center; padding: 60px 20px;">
+        <div class="loading-spinner"></div>
+        <p>Cargando historial de compras...</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let todasLasOrdenes = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+      
+      if (!token || !usuario) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      cargarHistorial();
+    });
+    
+    async function cargarHistorial() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/ordenes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          todasLasOrdenes = data.ordenes;
+          mostrarHistorial(data.ordenes);
+          actualizarEstadisticas(data);
+        } else {
+          mostrarError('Error al cargar el historial');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarError('Error de conexión');
+      }
+    }
+    
+    function mostrarHistorial(ordenes) {
+      const contenedor = document.getElementById('contenidoHistorial');
+      
+      if (!ordenes || ordenes.length === 0) {
+        contenedor.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h2 style="margin-bottom: 15px;">No hay compras aún</h2>
+            <p style="margin-bottom: 30px; color: #94a3b8;">Tus órdenes aparecerán aquí cuando realices tu primera compra.</p>
+            <button class="btn" onclick="window.location.href='dashboard.html'">
+              <i class="fas fa-store"></i> Ir a la Tienda
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      ordenes.forEach(orden => {
+        const fecha = new Date(orden.fecha_creacion).toLocaleString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const items = JSON.parse(orden.items);
+        const estadoClass = orden.estado === 'completado' ? 'estado-completado' : 'estado-pendiente';
+        const estadoTexto = orden.estado === 'completado' ? 'Completado' : 'Pendiente';
+        
+        let productosHtml = '';
+        items.forEach(item => {
+          productosHtml += `
+            <div class="producto-item">
+              <div class="producto-nombre">${item.nombre}</div>
+              <div class="producto-detalle">
+                <span>Cantidad: ${item.cantidad}</span>
+                <span>$${parseFloat(item.subtotal).toFixed(2)}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `
+          <div class="orden-card">
+            <div class="orden-header">
+              <div>
+                <div class="orden-id">
+                  <i class="fas fa-receipt"></i> Orden #${orden.id}
+                </div>
+                <div class="orden-fecha">
+                  <i class="fas fa-calendar"></i> ${fecha}
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <span class="estado-badge ${estadoClass}">${estadoTexto}</span>
+                <div class="orden-total">$${parseFloat(orden.total).toFixed(2)}</div>
+                <small style="color: #94a3b8;">ID PayPal: ${orden.orden_id_paypal.slice(-8)}</small>
+              </div>
+            </div>
+            
+            <div>
+              <h4 style="margin-bottom: 15px;">Productos:</h4>
+              <div class="productos-lista">
+                ${productosHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      contenedor.innerHTML = html;
+    }
+    
+    function actualizarEstadisticas(data) {
+      document.getElementById('totalOrdenes').textContent = data.total_ordenes || 0;
+      document.getElementById('totalGastado').textContent = `$${parseFloat(data.total_gastado || 0).toFixed(2)}`;
+    }
+    
+    function filtrarOrdenes(filtro) {
+      // Actualizar botones
+      document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Filtrar órdenes
+      if (filtro === 'todas') {
+        mostrarHistorial(todasLasOrdenes);
+      } else {
+        const filtradas = todasLasOrdenes.filter(orden => orden.estado === filtro);
+        mostrarHistorial(filtradas);
+      }
+    }
+    
+    function mostrarError(mensaje) {
+      const contenedor = document.getElementById('contenidoHistorial');
+      contenedor.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px;">
+          <div style="font-size: 64px; margin-bottom: 20px; color: var(--error);">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <h2 style="margin-bottom: 15px;">Error</h2>
+          <p style="margin-bottom: 30px; color: #ef4444;">${mensaje}</p>
+          <button class="btn" onclick="location.reload()">
+            <i class="fas fa-redo"></i> Reintentar
+          </button>
+        </div>
+      `;
+    }
+    
+    // Estilos para el loading spinner
+    const style = document.createElement('style');
+    style.textContent = `
+      .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent);
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

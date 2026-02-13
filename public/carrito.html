@@ -393,9 +393,9 @@
         </div>
         
         <div style="margin-top: 30px;">
-          <button class="btn" style="width: 100%;" id="btnProcederPago">
-            <i class="fas fa-lock"></i>
-            Proceder al Pago
+          <button class="btn" style="width: 100%;" id="btnProcederPago" onclick="window.location.href='pago.html'">
+            <i class="fas fa-paypal"></i>
+            Pagar con PayPal
           </button>
         </div>
         
@@ -720,16 +720,11 @@
     // Proceder al pago (Evaluación 5)
     function procederPago() {
       if (!carritoData || !carritoData.items || carritoData.items.length === 0) {
-        mostrarMensaje('Tu carrito está vacío. Agrega productos antes de proceder al pago.', 'warning');
-        return;
-      }
-      
-      mostrarMensaje('Redirigiendo a pasarela de pagos...', 'info');
-      // En la siguiente evaluación implementaremos PayPal/Stripe
-      setTimeout(() => {
-        mostrarMensaje('🚧 Funcionalidad de pagos en desarrollo. Se implementará en la Evaluación 5.', 'info');
-      }, 1000);
+        mostrarMensaje('Tu carrito está vacío', 'warning');
+      return;
     }
+    window.location.href = 'pago.html';
+  }
     
     // Modal de confirmación
     function cerrarModalConfirmacion() {

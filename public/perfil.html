@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil | Nexus Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .perfil-container {
+      max-width: 800px;
+      padding: 20px;
+    }
+    
+    .perfil-header {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .perfil-info h2 {
+      margin-bottom: 5px;
+    }
+    
+    .perfil-rol {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .rol-admin {
+      background: rgba(244, 63, 94, 0.2);
+      color: #f43f5e;
+    }
+    
+    .rol-user {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    
+    .perfil-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: var(--transition);
+    }
+    
+    .tab.active {
+      background: rgba(76, 201, 240, 0.1);
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado -->
+  <div class="background-animation">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+  </div>
+
+  <div class="container perfil-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+      </button>
+    </div>
+    
+    <!-- Header del perfil -->
+    <div class="perfil-header">
+      <div class="avatar" id="userAvatar">JD</div>
+      <div class="perfil-info">
+        <h2 id="userNombre">Cargando...</h2>
+        <p id="userEmail">cargando...</p>
+        <span class="perfil-rol" id="userRol"></span>
+      </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="perfil-stats">
+      <div class="stat-box">
+        <div class="stat-number" id="totalCompras">0</div>
+        <div style="color: #94a3b8;">Compras realizadas</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="totalGastado">$0</div>
+        <div style="color: #94a3b8;">Total gastado</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="membresia">-</div>
+        <div style="color: #94a3b8;">Membresía</div>
+      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="cambiarTab('info')">Información Personal</div>
+      <div class="tab" onclick="cambiarTab('password')">Cambiar Contraseña</div>
+    </div>
+    
+    <!-- Tab: Información Personal -->
+    <div id="tab-info" class="tab-content active">
+      <form id="formPerfil">
+        <div class="form-group">
+          <label for="nombre">Nombre Completo</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user"></i>
+            <input type="text" id="nombre" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Correo Electrónico</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn" id="btnGuardarPerfil">
+            <i class="fas fa-save"></i>
+            <span id="btnGuardarTexto">Guardar Cambios</span>
+            <div class="loading" id="loadingGuardar" style="display: none;"></div>
+          </button>
+        </div>
+      </form>
+      
+      <div id="mensajePerfil"></div>
+    </div>
+    
+    <!-- Tab: Cambiar Contraseña -->
+    <div id="tab-password" class="tab-content">
+      <form id="formPassword">
+        <div class="form-group">
+          <label for="passwordActual">Contraseña Actual</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="passwordActual" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="passwordNuevo">Nueva Contraseña</label>
+          <div class="input-with-icon">
+            <i class="fas fa-key"></i>
+            <input type="password" id="passwordNuevo" required minlength="8">
+          </div>
+          <small style="color: #94a3b8;">Mínimo 8 caracteres</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="passwordConfirmar">Confirmar Nueva Contraseña</label>
+          <div class="input-with-icon">
+            <i class="fas fa-check-circle"></i>
+            <input type="password" id="passwordConfirmar" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn" id="btnCambiarPassword">
+            <i class="fas fa-key"></i>
+            <span id="btnPasswordTexto">Cambiar Contraseña</span>
+            <div class="loading" id="loadingPassword" style="display: none;"></div>
+          </button>
+        </div>
+      </form>
+      
+      <div id="mensajePassword"></div>
+    </div>
+  </div>
+  
+  <script>
+    let usuario = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      usuario = JSON.parse(localStorage.getItem('usuario'));
+      
+      if (!token || !usuario) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      cargarPerfil();
+      
+      // Configurar formularios
+      document.getElementById('formPerfil').addEventListener('submit', actualizarPerfil);
+      document.getElementById('formPassword').addEventListener('submit', cambiarPassword);
+    });
+    
+    async function cargarPerfil() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/perfil', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const perfil = await response.json();
+        
+        if (response.ok) {
+          mostrarPerfil(perfil);
+        } else {
+          mostrarError('Error al cargar perfil');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarError('Error de conexión');
+      }
+    }
+    
+    function mostrarPerfil(perfil) {
+      // Información básica
+      document.getElementById('userNombre').textContent = perfil.nombre;
+      document.getElementById('userEmail').textContent = perfil.email;
+      
+      // Avatar con iniciales
+      const iniciales = perfil.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+      document.getElementById('userAvatar').textContent = iniciales.substring(0, 2);
+      
+      // Rol
+      const rolEl = document.getElementById('userRol');
+      rolEl.textContent = perfil.nivel === 'admin' ? 'Administrador' : 'Usuario';
+      rolEl.className = `perfil-rol ${perfil.nivel === 'admin' ? 'rol-admin' : 'rol-user'}`;
+      
+      // Estadísticas
+      document.getElementById('totalCompras').textContent = perfil.total_compras || 0;
+      document.getElementById('totalGastado').textContent = `$${parseFloat(perfil.total_gastado || 0).toFixed(2)}`;
+      document.getElementById('membresia').textContent = perfil.nivel === 'admin' ? 'Premium' : 'Estándar';
+      
+      // Llenar formulario
+      document.getElementById('nombre').value = perfil.nombre;
+      document.getElementById('email').value = perfil.email;
+    }
+    
+    async function actualizarPerfil(e) {
+      e.preventDefault();
+      
+      const nombre = document.getElementById('nombre').value;
+      const email = document.getElementById('email').value;
+      
+      // Mostrar loading
+      const btnGuardar = document.getElementById('btnGuardarPerfil');
+      const btnTexto = document.getElementById('btnGuardarTexto');
+      const loading = document.getElementById('loadingGuardar');
+      const mensajeEl = document.getElementById('mensajePerfil');
+      
+      btnTexto.textContent = 'Guardando...';
+      loading.style.display = 'inline-block';
+      btnGuardar.disabled = true;
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/perfil', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ nombre, email })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          mensajeEl.innerHTML = `
+            <div style="padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 12px; color: #4ade80; margin-top: 20px;">
+              <i class="fas fa-check-circle"></i> Perfil actualizado exitosamente
+            </div>
+          `;
+          
+          // Actualizar localStorage
+          const usuario = JSON.parse(localStorage.getItem('usuario'));
+          usuario.nombre = nombre;
+          usuario.email = email;
+          localStorage.setItem('usuario', JSON.stringify(usuario));
+          
+          // Actualizar UI
+          document.getElementById('userNombre').textContent = nombre;
+          document.getElementById('userEmail').textContent = email;
+        } else {
+          mensajeEl.innerHTML = `
+            <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+              <i class="fas fa-exclamation-circle"></i> Error: ${data.error}
+            </div>
+          `;
+        }
+      } catch (error) {
+        mensajeEl.innerHTML = `
+          <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+            <i class="fas fa-exclamation-circle"></i> Error de conexión
+          </div>
+        `;
+      } finally {
+        btnTexto.textContent = 'Guardar Cambios';
+        loading.style.display = 'none';
+        btnGuardar.disabled = false;
+      }
+    }
+    
+    async function cambiarPassword(e) {
+      e.preventDefault();
+      
+      const passwordActual = document.getElementById('passwordActual').value;
+      const passwordNuevo = document.getElementById('passwordNuevo').value;
+      const passwordConfirmar = document.getElementById('passwordConfirmar').value;
+      const mensajeEl = document.getElementById('mensajePassword');
+      
+      // Validaciones
+      if (passwordNuevo !== passwordConfirmar) {
+        mensajeEl.innerHTML = `
+          <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+            <i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden
+          </div>
+        `;
+        return;
+      }
+      
+      if (passwordNuevo.length < 8) {
+        mensajeEl.innerHTML = `
+          <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+            <i class="fas fa-exclamation-circle"></i> La contraseña debe tener al menos 8 caracteres
+          </div>
+        `;
+        return;
+      }
+      
+      // Mostrar loading
+      const btnCambiar = document.getElementById('btnCambiarPassword');
+      const btnTexto = document.getElementById('btnPasswordTexto');
+      const loading = document.getElementById('loadingPassword');
+      
+      btnTexto.textContent = 'Cambiando...';
+      loading.style.display = 'inline-block';
+      btnCambiar.disabled = true;
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/perfil/password', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ password_actual: passwordActual, password_nuevo: passwordNuevo })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          mensajeEl.innerHTML = `
+            <div style="padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 12px; color: #4ade80; margin-top: 20px;">
+              <i class="fas fa-check-circle"></i> Contraseña actualizada exitosamente
+            </div>
+          `;
+          
+          // Limpiar formulario
+          document.getElementById('formPassword').reset();
+        } else {
+          mensajeEl.innerHTML = `
+            <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+              <i class="fas fa-exclamation-circle"></i> Error: ${data.error}
+            </div>
+          `;
+        }
+      } catch (error) {
+        mensajeEl.innerHTML = `
+          <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; color: #ef4444; margin-top: 20px;">
+            <i class="fas fa-exclamation-circle"></i> Error de conexión
+          </div>
+        `;
+      } finally {
+        btnTexto.textContent = 'Cambiar Contraseña';
+        loading.style.display = 'none';
+        btnCambiar.disabled = false;
+      }
+    }
+    
+    function cambiarTab(tab) {
+      // Actualizar tabs
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+    
+    function mostrarError(mensaje) {
+      // Implementar según necesidad
+      console.error(mensaje);
+    }
+  </script>
+</body>
+</html>
