@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin | Nexus Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      padding: 20px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stats-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-icon {
+      font-size: 32px;
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+    
+    .stats-number {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stats-label {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    
+    .admin-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+    
+    .admin-tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+    }
+    
+    .admin-tab.active {
+      background: rgba(76, 201, 240, 0.1);
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    
+    .tab-pane {
+      display: none;
+    }
+    
+    .tab-pane.active {
+      display: block;
+    }
+    
+    .usuarios-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .usuarios-table th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    
+    .usuarios-table td {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .select-rol {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado -->
+  <div class="background-animation">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+  </div>
+
+  <div class="container admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+      <div>
+        <h1><i class="fas fa-crown"></i> Panel de Administración</h1>
+        <p>Gestiona el sistema desde este panel</p>
+      </div>
+      <button class="btn btn-secondary" onclick="window.location.href='../dashboard.html'">
+        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+      </button>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsContainer">
+      <!-- Se llena con JS -->
+    </div>
+    
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="cambiarAdminTab('usuarios')">
+        <i class="fas fa-users"></i> Usuarios
+      </div>
+      <div class="admin-tab" onclick="cambiarAdminTab('productos')">
+        <i class="fas fa-box"></i> Productos
+      </div>
+      <div class="admin-tab" onclick="cambiarAdminTab('ordenes')">
+        <i class="fas fa-shopping-cart"></i> Órdenes
+      </div>
+      <div class="admin-tab" onclick="cambiarAdminTab('config')">
+        <i class="fas fa-cog"></i> Configuración
+      </div>
+    </div>
+    
+    <!-- Tab: Usuarios -->
+    <div id="tab-usuarios" class="tab-pane active">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <h3>Gestión de Usuarios</h3>
+        <div>
+          <input type="text" placeholder="Buscar usuario..." style="width: 250px;" id="buscarUsuario">
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="usuarios-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Compras</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUsuarios">
+            <tr>
+              <td colspan="6" style="text-align: center;">Cargando usuarios...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Tab: Productos -->
+    <div id="tab-productos" class="tab-pane">
+      <h3>Gestión de Productos</h3>
+      <p style="margin-bottom: 20px;">Desde aquí puedes administrar todos los productos.</p>
+      <button class="btn" onclick="window.location.href='../dashboard.html'">
+        <i class="fas fa-edit"></i> Ir al Gestor de Productos
+      </button>
+    </div>
+    
+    <!-- Tab: Órdenes -->
+    <div id="tab-ordenes" class="tab-pane">
+      <h3>Todas las Órdenes</h3>
+      <div id="contenedorOrdenes" style="margin-top: 20px;">
+        <!-- Se llena con JS -->
+      </div>
+    </div>
+    
+    <!-- Tab: Configuración -->
+    <div id="tab-config" class="tab-pane">
+      <h3>Configuración del Sistema</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-top: 30px;">
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px;">
+          <h4 style="margin-bottom: 20px;"><i class="fas fa-paypal"></i> PayPal</h4>
+          <div class="form-group">
+            <label>Client ID</label>
+            <input type="text" value="********************" disabled>
+          </div>
+          <div class="form-group">
+            <label>Modo</label>
+            <input type="text" value="Sandbox" disabled>
+          </div>
+        </div>
+        
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px;">
+          <h4 style="margin-bottom: 20px;"><i class="fas fa-database"></i> Base de Datos</h4>
+          <div class="form-group">
+            <label>Estado</label>
+            <input type="text" value="Conectado" style="color: #4ade80;" disabled>
+          </div>
+          <div class="form-group">
+            <label>Tablas</label>
+            <input type="text" value="Usuarios, Productos, Carritos, Órdenes" disabled>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let usuarios = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+      
+      if (!token || !usuario) {
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      if (usuario.nivel !== 'admin') {
+        window.location.href = '../dashboard.html';
+        return;
+      }
+      
+      cargarEstadisticas();
+      cargarUsuarios();
+      cargarTodasOrdenes();
+      
+      document.getElementById('buscarUsuario').addEventListener('input', filtrarUsuarios);
+    });
+    
+    async function cargarEstadisticas() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/admin/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const stats = await response.json();
+        
+        if (response.ok) {
+          mostrarEstadisticas(stats);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    function mostrarEstadisticas(stats) {
+      const container = document.getElementById('statsContainer');
+      
+      container.innerHTML = `
+        <div class="stats-card">
+          <div class="stats-icon"><i class="fas fa-users"></i></div>
+          <div class="stats-number">${stats.total_usuarios || 0}</div>
+          <div class="stats-label">Usuarios registrados</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-icon"><i class="fas fa-user-tie"></i></div>
+          <div class="stats-number">${stats.total_admins || 0}</div>
+          <div class="stats-label">Administradores</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-icon"><i class="fas fa-box"></i></div>
+          <div class="stats-number">${stats.total_productos || 0}</div>
+          <div class="stats-label">Productos</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-icon"><i class="fas fa-shopping-cart"></i></div>
+          <div class="stats-number">${stats.total_ordenes || 0}</div>
+          <div class="stats-label">Órdenes</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stats-number">$${parseFloat(stats.ventas_totales || 0).toFixed(2)}</div>
+          <div class="stats-label">Ventas totales</div>
+        </div>
+      `;
+    }
+    
+    async function cargarUsuarios() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/admin/usuarios', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        usuarios = await response.json();
+        
+        if (response.ok) {
+          mostrarUsuarios(usuarios);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    function mostrarUsuarios(listaUsuarios) {
+      const tbody = document.getElementById('tablaUsuarios');
+      
+      if (!listaUsuarios || listaUsuarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados</td></tr>';
+        return;
+      }
+      
+      let html = '';
+      
+      listaUsuarios.forEach(user => {
+        const esUsuarioActual = user.email === JSON.parse(localStorage.getItem('usuario')).email;
+        
+        html += `
+          <tr>
+            <td style="color: #94a3b8;">#${user.id}</td>
+            <td><strong>${user.nombre}</strong></td>
+            <td>${user.email}</td>
+            <td>
+              <select class="select-rol" onchange="cambiarRol(${user.id}, this.value)" ${esUsuarioActual ? 'disabled' : ''}>
+                <option value="usuario" ${user.nivel === 'usuario' ? 'selected' : ''}>Usuario</option>
+                <option value="admin" ${user.nivel === 'admin' ? 'selected' : ''}>Administrador</option>
+              </select>
+            </td>
+            <td>${user.total_compras || 0} compras</td>
+            <td>
+              ${!esUsuarioActual ? `
+                <button class="action-icon" onclick="eliminarUsuario(${user.id})" style="color: #ef4444;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+    }
+    
+    function filtrarUsuarios() {
+      const busqueda = document.getElementById('buscarUsuario').value.toLowerCase();
+      
+      const filtrados = usuarios.filter(user => 
+        user.nombre.toLowerCase().includes(busqueda) || 
+        user.email.toLowerCase().includes(busqueda)
+      );
+      
+      mostrarUsuarios(filtrados);
+    }
+    
+    async function cambiarRol(userId, nuevoRol) {
+      if (!confirm('¿Estás seguro de cambiar el rol de este usuario?')) {
+        cargarUsuarios(); // Recargar para revertir el select
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/admin/usuarios/${userId}/rol`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ nivel: nuevoRol })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert('✅ Rol actualizado exitosamente');
+          cargarUsuarios();
+          cargarEstadisticas();
+        } else {
+          alert('❌ Error: ' + data.error);
+          cargarUsuarios();
+        }
+      } catch (error) {
+        alert('❌ Error de conexión');
+        cargarUsuarios();
+      }
+    }
+    
+    async function eliminarUsuario(userId) {
+      if (!confirm('⚠️ ¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
+        return;
+      }
+      
+      // Aquí implementarías la lógica para eliminar usuario
+      alert('🚧 Función de eliminar usuario en desarrollo');
+    }
+    
+    async function cargarTodasOrdenes() {
+      // Esta función requeriría un endpoint nuevo para admin
+      // Por ahora mostramos mensaje
+      document.getElementById('contenedorOrdenes').innerHTML = `
+        <div style="text-align: center; padding: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 12px;">
+          <i class="fas fa-chart-line" style="font-size: 48px; color: var(--accent); margin-bottom: 20px;"></i>
+          <h3>Reportes de Ventas</h3>
+          <p style="margin-bottom: 20px;">Aquí podrás ver todas las órdenes del sistema y generar reportes.</p>
+          <p style="color: #94a3b8;">Función disponible en próxima actualización</p>
+        </div>
+      `;
+    }
+    
+    function cambiarAdminTab(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

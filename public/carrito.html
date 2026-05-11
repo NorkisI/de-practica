@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Carrito | Nexus Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilos específicos del carrito */
+    .carrito-container {
+      max-width: 1000px;
+      padding: 20px;
+    }
+    
+    .carrito-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .carrito-title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .carrito-icon {
+      font-size: 32px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .carrito-stats {
+      display: flex;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px 25px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .carrito-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-carrito {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-continue {
+      background: var(--primary-gradient);
+      color: white;
+    }
+    
+    .btn-vaciar {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-back {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .carrito-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+    }
+    
+    @media (max-width: 900px) {
+      .carrito-content {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .items-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+    }
+    
+    .resumen-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .resumen-title {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .resumen-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      color: #cbd5e1;
+    }
+    
+    .resumen-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid rgba(255, 255, 255, 0.2);
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .empty-carrito {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .carrito-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+    
+    .carrito-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .item-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      color: white;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .item-details {
+      flex-grow: 1;
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    
+    .item-name {
+      font-weight: 600;
+      font-size: 16px;
+      color: white;
+    }
+    
+    .item-price {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .item-code {
+      font-size: 12px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+    
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 5px;
+    }
+    
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .qty-btn:hover {
+      background: var(--accent);
+    }
+    
+    .qty-value {
+      min-width: 30px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .item-subtotal {
+      font-weight: 700;
+      color: white;
+      margin-left: auto;
+    }
+    
+    .remove-item {
+      color: #ef4444;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .remove-item:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+    
+    .loading-carrito {
+      text-align: center;
+      padding: 40px;
+      color: #94a3b8;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado -->
+  <div class="background-animation">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+  </div>
+
+  <div class="container carrito-container">
+    <!-- Header del carrito -->
+    <div class="carrito-header">
+      <div class="carrito-title">
+        <div class="carrito-icon">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div>
+          <h1>Mi Carrito de Compras</h1>
+          <p>Gestiona los productos que deseas adquirir</p>
+        </div>
+      </div>
+      
+      <div class="carrito-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="totalItems">0</div>
+          <div class="stat-label">Productos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalUnidades">0</div>
+          <div class="stat-label">Unidades</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$<span id="totalPrecio">0.00</span></div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="carrito-actions">
+      <button class="btn-carrito btn-back" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+      </button>
+      <button class="btn-carrito btn-continue" onclick="window.location.href='dashboard.html?seccion=productos'">
+        <i class="fas fa-plus"></i> Seguir Comprando
+      </button>
+      <button class="btn-carrito btn-vaciar" id="btnVaciarCarrito">
+        <i class="fas fa-trash"></i> Vaciar Carrito
+      </button>
+    </div>
+    
+    <div class="carrito-content">
+      <!-- Lista de items del carrito -->
+      <div class="items-container">
+        <h2><i class="fas fa-boxes"></i> Productos en tu Carrito</h2>
+        <div id="carritoItems">
+          <div class="loading-carrito">
+            <div class="loading-spinner"></div>
+            <p>Cargando tu carrito...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Resumen de compra -->
+      <div class="resumen-container">
+        <h2 class="resumen-title"><i class="fas fa-receipt"></i> Resumen de Compra</h2>
+        
+        <div class="resumen-item">
+          <span>Subtotal</span>
+          <span>$<span id="resumenSubtotal">0.00</span></span>
+        </div>
+        
+        <div class="resumen-item">
+          <span>Envío</span>
+          <span id="resumenEnvio">Gratis</span>
+        </div>
+        
+        <div class="resumen-item">
+          <span>Impuestos (10%)</span>
+          <span>$<span id="resumenImpuestos">0.00</span></span>
+        </div>
+        
+        <div class="resumen-total">
+          <span>Total</span>
+          <span>$<span id="resumenTotal">0.00</span></span>
+        </div>
+        
+        <div style="margin-top: 30px;">
+          <button class="btn" style="width: 100%;" id="btnProcederPago" onclick="window.location.href='pago.html'">
+            <i class="fas fa-paypal"></i>
+            Pagar con PayPal
+          </button>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 12px; color: #94a3b8; text-align: center;">
+          <p><i class="fas fa-shield-alt"></i> Compra 100% segura</p>
+          <p><i class="fas fa-sync-alt"></i> Devoluciones en 30 días</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal de confirmación -->
+  <div class="form-modal" id="modalConfirmacion">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2><i class="fas fa-exclamation-triangle"></i> Confirmar</h2>
+        <button class="close-modal" onclick="cerrarModalConfirmacion()">&times;</button>
+      </div>
+      
+      <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 48px; color: var(--warning); margin-bottom: 20px;">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h3 id="modalTitulo"></h3>
+        <p id="modalMensaje"></p>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 30px;">
+        <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()" style="flex: 1;">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn" onclick="confirmarAccion()" id="btnConfirmarAccion" style="flex: 1;">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Variables globales
+    let carritoData = null;
+    let accionConfirmar = null;
+    let itemAEliminar = null;
+    
+    // Verificar autenticación
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+      
+      if (!token || !usuario) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Cargar carrito
+      cargarCarrito();
+      
+      // Configurar listeners
+      document.getElementById('btnVaciarCarrito').addEventListener('click', confirmarVaciarCarrito);
+      document.getElementById('btnProcederPago').addEventListener('click', procederPago);
+    });
+    
+    // Cargar carrito desde el servidor
+    async function cargarCarrito() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/carrito', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.status === 401) {
+          // Token expirado
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        carritoData = await response.json();
+        
+        if (response.ok) {
+          mostrarCarrito(carritoData);
+          actualizarResumen(carritoData);
+          actualizarEstadisticas(carritoData);
+        } else {
+          mostrarCarritoVacio('Error al cargar el carrito');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarCarritoVacio('Error de conexión al servidor');
+      }
+    }
+    
+    // Mostrar items del carrito
+    function mostrarCarrito(data) {
+      const contenedor = document.getElementById('carritoItems');
+      
+      if (!data.items || data.items.length === 0) {
+        mostrarCarritoVacio();
+        return;
+      }
+      
+      let html = '';
+      
+      data.items.forEach(item => {
+        html += `
+          <div class="carrito-item" id="item-${item.id}">
+            <div class="item-image">
+              <i class="fas fa-box"></i>
+            </div>
+            
+            <div class="item-details">
+              <div class="item-header">
+                <div>
+                  <div class="item-name">${item.nombre}</div>
+                  <div class="item-code">Código: ${item.codigo}</div>
+                </div>
+                <div class="item-price">$${parseFloat(item.precio).toFixed(2)}</div>
+              </div>
+              
+              <div class="item-actions">
+                <div class="quantity-control">
+                  <button class="qty-btn" onclick="cambiarCantidad(${item.id}, ${item.cantidad - 1})">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <span class="qty-value">${item.cantidad}</span>
+                  <button class="qty-btn" onclick="cambiarCantidad(${item.id}, ${item.cantidad + 1})">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+                
+                <div class="item-subtotal">
+                  Subtotal: $${parseFloat(item.subtotal).toFixed(2)}
+                </div>
+                
+                <button class="remove-item" onclick="confirmarEliminarItem(${item.id}, '${item.nombre}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      contenedor.innerHTML = html;
+    }
+    
+    // Mostrar carrito vacío
+    function mostrarCarritoVacio(mensaje = null) {
+      const contenedor = document.getElementById('carritoItems');
+      
+      contenedor.innerHTML = `
+        <div class="empty-carrito">
+          <div class="empty-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <h3>Tu carrito está vacío</h3>
+          <p>${mensaje || 'Agrega productos desde el catálogo para comenzar a comprar.'}</p>
+          <button class="btn" onclick="window.location.href='dashboard.html?seccion=productos'" style="margin-top: 20px;">
+            <i class="fas fa-store"></i> Ir al Catálogo
+          </button>
+        </div>
+      `;
+      
+      // Actualizar estadísticas a cero
+      document.getElementById('totalItems').textContent = '0';
+      document.getElementById('totalUnidades').textContent = '0';
+      document.getElementById('totalPrecio').textContent = '0.00';
+    }
+    
+    // Actualizar estadísticas en el header
+    function actualizarEstadisticas(data) {
+      if (!data.items || data.items.length === 0) {
+        document.getElementById('totalItems').textContent = '0';
+        document.getElementById('totalUnidades').textContent = '0';
+        document.getElementById('totalPrecio').textContent = '0.00';
+        return;
+      }
+      
+      const totalItems = data.items.length;
+      const totalUnidades = data.items.reduce((sum, item) => sum + item.cantidad, 0);
+      const totalPrecio = parseFloat(data.total).toFixed(2);
+      
+      document.getElementById('totalItems').textContent = totalItems;
+      document.getElementById('totalUnidades').textContent = totalUnidades;
+      document.getElementById('totalPrecio').textContent = totalPrecio;
+    }
+    
+    // Actualizar resumen de compra
+    function actualizarResumen(data) {
+      if (!data.items || data.items.length === 0) {
+        document.getElementById('resumenSubtotal').textContent = '0.00';
+        document.getElementById('resumenImpuestos').textContent = '0.00';
+        document.getElementById('resumenTotal').textContent = '0.00';
+        return;
+      }
+      
+      const subtotal = parseFloat(data.total);
+      const impuestos = subtotal * 0.10; // 10% de impuestos
+      const total = subtotal + impuestos;
+      
+      document.getElementById('resumenSubtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('resumenImpuestos').textContent = impuestos.toFixed(2);
+      document.getElementById('resumenTotal').textContent = total.toFixed(2);
+    }
+    
+    // Cambiar cantidad de un item
+    async function cambiarCantidad(itemId, nuevaCantidad) {
+      if (nuevaCantidad < 1) {
+        // Si la cantidad es menor a 1, eliminar el item
+        const item = carritoData.items.find(i => i.id === itemId);
+        if (item) {
+          confirmarEliminarItem(itemId, item.nombre);
+        }
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/carrito/${itemId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ cantidad: nuevaCantidad })
+        });
+        
+        if (response.ok) {
+          // Recargar carrito
+          cargarCarrito();
+          mostrarMensaje('Cantidad actualizada', 'success');
+        } else {
+          const error = await response.json();
+          mostrarMensaje('Error: ' + error.error, 'error');
+        }
+      } catch (error) {
+        mostrarMensaje('Error de conexión', 'error');
+      }
+    }
+    
+    // Confirmar eliminar item
+    function confirmarEliminarItem(itemId, nombre) {
+      itemAEliminar = itemId;
+      
+      document.getElementById('modalTitulo').textContent = 'Eliminar Producto';
+      document.getElementById('modalMensaje').textContent = `¿Estás seguro de eliminar "${nombre}" de tu carrito?`;
+      document.getElementById('btnConfirmarAccion').innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+      
+      accionConfirmar = eliminarItem;
+      document.getElementById('modalConfirmacion').style.display = 'flex';
+    }
+    
+    // Eliminar item del carrito
+    async function eliminarItem() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/carrito/${itemAEliminar}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          cargarCarrito();
+          mostrarMensaje('Producto eliminado del carrito', 'success');
+        } else {
+          const error = await response.json();
+          mostrarMensaje('Error: ' + error.error, 'error');
+        }
+      } catch (error) {
+        mostrarMensaje('Error de conexión', 'error');
+      } finally {
+        cerrarModalConfirmacion();
+        itemAEliminar = null;
+      }
+    }
+    
+    // Confirmar vaciar carrito
+    function confirmarVaciarCarrito() {
+      if (!carritoData || !carritoData.items || carritoData.items.length === 0) {
+        mostrarMensaje('Tu carrito ya está vacío', 'info');
+        return;
+      }
+      
+      document.getElementById('modalTitulo').textContent = 'Vaciar Carrito';
+      document.getElementById('modalMensaje').textContent = `¿Estás seguro de vaciar todo tu carrito? Se eliminarán ${carritoData.items.length} productos.`;
+      document.getElementById('btnConfirmarAccion').innerHTML = '<i class="fas fa-trash"></i> Vaciar Todo';
+      
+      accionConfirmar = vaciarCarrito;
+      document.getElementById('modalConfirmacion').style.display = 'flex';
+    }
+    
+    // Vaciar carrito completo
+    async function vaciarCarrito() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/carrito', {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          cargarCarrito();
+          mostrarMensaje('Carrito vaciado exitosamente', 'success');
+        } else {
+          const error = await response.json();
+          mostrarMensaje('Error: ' + error.error, 'error');
+        }
+      } catch (error) {
+        mostrarMensaje('Error de conexión', 'error');
+      } finally {
+        cerrarModalConfirmacion();
+      }
+    }
+    
+    // Proceder al pago (Evaluación 5)
+    function procederPago() {
+      if (!carritoData || !carritoData.items || carritoData.items.length === 0) {
+        mostrarMensaje('Tu carrito está vacío', 'warning');
+      return;
+    }
+    window.location.href = 'pago.html';
+  }
+    
+    // Modal de confirmación
+    function cerrarModalConfirmacion() {
+      document.getElementById('modalConfirmacion').style.display = 'none';
+      accionConfirmar = null;
+      itemAEliminar = null;
+    }
+    
+    function confirmarAccion() {
+      if (accionConfirmar) {
+        accionConfirmar();
+      }
+    }
+    
+    // Mostrar mensajes
+    function mostrarMensaje(texto, tipo) {
+      // Tipos: success, error, info, warning
+      const colores = {
+        success: { bg: 'rgba(74, 222, 128, 0.2)', color: '#4ade80', border: 'rgba(74, 222, 128, 0.3)' },
+        error: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: 'rgba(239, 68, 68, 0.3)' },
+        info: { bg: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', border: 'rgba(59, 130, 246, 0.3)' },
+        warning: { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: 'rgba(245, 158, 11, 0.3)' }
+      };
+      
+      const color = colores[tipo] || colores.info;
+      
+      // Crear elemento de mensaje
+      let mensajeEl = document.getElementById('mensajeFlotante');
+      if (!mensajeEl) {
+        mensajeEl = document.createElement('div');
+        mensajeEl.id = 'mensajeFlotante';
+        mensajeEl.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 25px;
+          border-radius: 12px;
+          font-weight: 500;
+          z-index: 9999;
+          animation: slideInRight 0.3s ease;
+          max-width: 300px;
+          backdrop-filter: blur(10px);
+        `;
+        document.body.appendChild(mensajeEl);
+      }
+      
+      mensajeEl.textContent = texto;
+      mensajeEl.style.background = color.bg;
+      mensajeEl.style.color = color.color;
+      mensajeEl.style.border = `1px solid ${color.border}`;
+      
+      // Auto-ocultar después de 3 segundos
+      setTimeout(() => {
+        mensajeEl.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => {
+          if (mensajeEl.parentNode) {
+            mensajeEl.parentNode.removeChild(mensajeEl);
+          }
+        }, 500);
+      }, 3000);
+    }
+    
+    // Agregar animaciones CSS si no existen
+    if (!document.querySelector('style[data-animaciones]')) {
+      const style = document.createElement('style');
+      style.setAttribute('data-animaciones', 'true');
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+          to { opacity: 0; }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  </script>
+</body>
+</html>
